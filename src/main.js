@@ -50,7 +50,7 @@ form.addEventListener('submit', async event => {
 
 loadMoreBtn.addEventListener('click', async () => {
   try {
-    searchParams.page += 1;
+    loader.style.display = 'inline-block';
     const photos = await fetchPhotos();
     createGallery(photos);
   } catch (error) {
@@ -113,6 +113,7 @@ function checkLimit() {
     );
     loadMoreBtn.style.display = 'none';
   } else {
+    searchParams.page += 1;
     loadMoreBtn.style.display = 'inline-block';
   }
 }
