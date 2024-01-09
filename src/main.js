@@ -29,7 +29,7 @@ const gallery = document.querySelector('.gallery');
 const loader = document.querySelector('.loader');
 const loadMoreBtn = document.querySelector('.load-more-btn');
 
-form.addEventListener('submit', async event => {
+async function startSearch(event) {
   event.preventDefault();
   if (!searchInput.value.trim()) {
     showErrorMessage('Please fill in the search field');
@@ -37,7 +37,7 @@ form.addEventListener('submit', async event => {
   }
   try {
     gallery.innerHTML = '';
-    loader.style.display = 'inline-block';
+    isContentVisible(loader, true);
     searchParams.q = searchInput.value.trim();
     searchParams.page = 1;
     const data = await fetchPhotos();
@@ -46,17 +46,18 @@ form.addEventListener('submit', async event => {
   } catch (error) {
     console.log(error);
   }
-});
+}
 
-loadMoreBtn.addEventListener('click', async () => {
+async function loadMore() {
   try {
-    loader.style.display = 'inline-block';
+    isContentVisible(loader, true);
+    isContentVisible(loadMoreBtn, false);
     const photos = await fetchPhotos();
     createGallery(photos);
   } catch (error) {
     console.log(error);
   }
-});
+}
 
 async function fetchPhotos() {
   const response = await axios.get('', { params: searchParams });
@@ -68,7 +69,7 @@ function createGallery(photos) {
     showErrorMessage(
       'Sorry, there are no images matching your search query. Please, try again!'
     );
-    loader.style.display = 'none';
+    isContentVisible(loader, false);
     return;
   }
   const markup = photos.hits
@@ -84,22 +85,22 @@ function createGallery(photos) {
       }) => {
         return `
         <li class="gallery-item">
-          <a class="gallery-link" href="${largeImageURL}">
-            <img class="api-img" src="${webformatURL}" alt="${tags}">
-            <div class="img-desc">
-              <span><b>Likes:</b> <br/>${likes}</span>
-              <span><b>Views:</b> <br/>${views}</span>
-              <span><b>Comments:</b> <br/>${comments}</span>
-              <span><b>Downloads:</b> <br/>${downloads}</span>
-            </div>
-          </a>
+        <a class="gallery-link" href="${largeImageURL}">
+        <img class="api-img" src="${webformatURL}" alt="${tags}">
+        <div class="img-desc">
+        <span><b>Likes:</b> <br/>${likes}</span>
+        <span><b>Views:</b> <br/>${views}</span>
+        <span><b>Comments:</b> <br/>${comments}</span>
+        <span><b>Downloads:</b> <br/>${downloads}</span>
+        </div>
+        </a>
         </li>
-                  `;
+        `;
       }
     )
     .join('');
   gallery.insertAdjacentHTML('beforeend', markup);
-  loader.style.display = 'none';
+  isContentVisible(loader, false);
   checkLimit();
   scrollPage();
   simpleGallery.refresh();
@@ -111,10 +112,17 @@ function checkLimit() {
     showErrorMessage(
       "We're sorry, but you've reached the end of search results."
     );
-    loadMoreBtn.style.display = 'none';
   } else {
     searchParams.page += 1;
-    loadMoreBtn.style.display = 'inline-block';
+    isContentVisible(loadMoreBtn, true);
+  }
+}
+
+function isContentVisible(content, isVisible) {
+  if (isVisible) {
+    content.classList.remove('hidden');
+  } else {
+    content.classList.add('hidden');
   }
 }
 
@@ -140,3 +148,7 @@ function showErrorMessage(message) {
     closeOnEscape: true,
   });
 }
+
+form.addEventListener('submit', event => startSearch(event));
+
+loadMoreBtn.addEventListener('click', () => loadMore());
