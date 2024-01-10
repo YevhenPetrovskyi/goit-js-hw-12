@@ -3,12 +3,15 @@ import SimpleLightbox from 'simplelightbox';
 import axios from 'axios';
 import errorSvg from '/img/error.svg';
 
-axios.defaults.baseURL = 'https://pixabay.com/api/';
+const API_BASE_URL = 'https://pixabay.com/api/';
+const API_KEY = '41647148-76dbe9dab66bab2692c283b6e';
+
+axios.defaults.baseURL = API_BASE_URL;
 
 let limit;
 
 const searchParams = {
-  key: '41647148-76dbe9dab66bab2692c283b6e',
+  key: API_KEY,
   q: '',
   image_type: 'photo',
   orientation: 'horizontal',
@@ -38,6 +41,7 @@ async function startSearch(event) {
   try {
     gallery.innerHTML = '';
     isContentVisible(loader, true);
+    isContentVisible(loadMoreBtn, false);
     searchParams.q = searchInput.value.trim();
     searchParams.page = 1;
     const data = await fetchPhotos();
